@@ -387,4 +387,36 @@ describe 'Computes' do
       expect(MultiJson.load(last_response.body).to_hash['id']).to eq 899_999
     end
   end
+
+  describe 'POST /computes/:id/upload' do
+    let(:compute) { create(:compute, provider_name: 'v_sphere', name: 'one') }
+
+    it 'returns 422 when compute not found' do
+      get "/computes/#{compute.id + 200}/upload"
+      expect(last_response.status).to eq 404
+    end
+
+    it 'returns 422 when user not specified' do
+      get "/computes/#{compute.id}/upload", 'user' => 'fooo'
+      expect(last_response.status).to eq 422
+    end
+
+    it 'returns 422 when user not specified' do
+      get "/computes/#{compute.id}/upload", 'password' => 'fooo'
+      expect(last_response.status).to eq 422
+    end
+
+    it 'returns 422 when user not specified' do
+      get "/computes/#{compute.id}/upload", 'user' => 'fake_user', 'password' => 'fake_password'
+      expect(last_response.status).to eq 422
+    end
+
+    it 'returns the created action and schedules the Sidekiq job', sidekiq: true do
+      expect do
+          post "/computes/#{compute.id}/upload", 'user' => 'fake_user', 'password' => 'fake_password', 'guest_file_path' => "/path/to/nowhere"
+          expect(last_response.status).to eq 200
+        end.to change(LabManager::ActionWorker.jobs, :size).by(1)      
+      end
+    end
+  end
 end

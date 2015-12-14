@@ -171,6 +171,37 @@ module LabManager
 
           action.to_json
         end
+
+        post '/:id/upload' do
+          compute = ::Compute.find(params[:id])
+          # verify params
+          halt 422, {
+            message: 'param user must be given'
+          }.to_json if params[:user].blank?
+          
+          halt 422, {
+            message: 'param password must be given'
+          }.to_json if params[:password].blank?
+
+          halt 422, {
+            message: 'param guest_file_path must be given'
+          }.to_json if params[:guest_file_path].blank?
+
+          halt 422, {
+            message: 'param file must be given'
+          }.to_json if params[:file].nil?
+
+          halt 422, {
+            message: 'tempfile field in param file is not initialized'
+          }.to_json if params[:file][:tempfile].nil?          
+          # build the action
+          action = c.actions.build(
+            command: :upload_file_vm, 
+            payload: {
+              user: params[:username], password: params[:password], guest_file_path: params[:guest_file_path]})
+          action.build_file_storage(file: params[:file][:tempfile])
+          action.to_json
+        end
       end
     end
   end

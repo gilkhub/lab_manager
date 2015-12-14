@@ -18,15 +18,17 @@ ActiveRecord::Schema.define(version: 20151118130706) do
 
   create_table "actions", force: :cascade do |t|
     t.integer  "compute_id"
-    t.string   "command",     default: "",       null: false
-    t.string   "state",       default: "queued", null: false
+    t.string   "command",      default: "",       null: false
+    t.string   "state",        default: "queued", null: false
     t.text     "reason"
     t.text     "payload"
     t.string   "job_id"
+    t.text     "action_data"
+    t.string   "file_storage"
     t.datetime "pending_at"
     t.datetime "finished_at"
-    t.datetime "created_at",                     null: false
-    t.datetime "updated_at",                     null: false
+    t.datetime "created_at",                      null: false
+    t.datetime "updated_at",                      null: false
   end
 
   create_table "computes", force: :cascade do |t|
